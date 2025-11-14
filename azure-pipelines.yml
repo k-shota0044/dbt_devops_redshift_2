@@ -43,6 +43,11 @@ steps:
   # dbt の実行
   - script: |
       dbt deps
-      dbt run
       dbt test
+      if [ $? -eq 0 ]; then
+        dbt run
+      else
+        echo "Tests failed. Skipping dbt run."
+        exit 1
+      fi
     displayName: 'Run dbt models and tests'
