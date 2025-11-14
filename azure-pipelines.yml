@@ -1,5 +1,5 @@
 variables:
-- group: dbt-secrets
+- group: dbt-pipeline-secrets
 
 
 trigger:
