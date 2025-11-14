@@ -25,17 +25,18 @@ steps:
   - script: |
       mkdir -p ~/.dbt
       echo "
-      my_profile:
-        target: dev
+      redshift2:
         outputs:
           dev:
-            type: redshift
+            dbname: $(REDSHIFT_DB)
             host: $(REDSHIFT_HOST)
-            user: $(REDSHIFT_USER)
             password: $(REDSHIFT_PASSWORD)
             port: 5439
-            dbname: $(REDSHIFT_DB)
             schema: $(REDSHIFT_SCHEMA)
+            threads: 1
+            type: redshift
+            user: $(REDSHIFT_USER)
+        target: dev
       " > ~/.dbt/profiles.yml
     displayName: 'Create dbt profiles.yml'
 
