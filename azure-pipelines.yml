@@ -1,3 +1,7 @@
+variables:
+- group: dbt-secrets
+
+
 trigger:
   - main
 
