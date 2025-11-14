@@ -1,9 +1,10 @@
 variables:
-- group: dbt-pipeline-secrets
-
+- group: dbt-pipeline-secrets  # REDSHIFT_HOST, REDSHIFT_USER, REDSHIFT_PASSWORD, REDSHIFT_DB, REDSHIFT_SCHEMA を登録
 
 trigger:
-  - main
+  branches:
+    include:
+      - main
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -11,16 +12,36 @@ pool:
 steps:
   - checkout: self
 
+  # Python と dbt のセットアップ
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.10'
 
   - script: |
       pip install dbt-core dbt-redshift
-      export REDSHIFT_PASSWORD=$(REDSHIFT_PASSWORD)
+    displayName: 'Install dbt'
+
+  # profiles.yml を作成
+  - script: |
+      mkdir -p ~/.dbt
+      echo "
+      my_profile:
+        target: dev
+        outputs:
+          dev:
+            type: redshift
+            host: $(REDSHIFT_HOST)
+            user: $(REDSHIFT_USER)
+            password: $(REDSHIFT_PASSWORD)
+            port: 5439
+            dbname: $(REDSHIFT_DB)
+            schema: $(REDSHIFT_SCHEMA)
+      " > ~/.dbt/profiles.yml
+    displayName: 'Create dbt profiles.yml'
+
+  # dbt の実行
+  - script: |
       dbt deps
       dbt run
       dbt test
-    env:
-      REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
     displayName: 'Run dbt models and tests'
