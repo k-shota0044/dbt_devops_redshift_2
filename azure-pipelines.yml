@@ -1,0 +1,22 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.10'
+
+  - script: |
+      pip install dbt-core dbt-redshift
+      export REDSHIFT_PASSWORD=$(REDSHIFT_PASSWORD)
+      dbt deps
+      dbt run
+      dbt test
+    env:
+      REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+    displayName: 'Run dbt models and tests'
